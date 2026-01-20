@@ -5,12 +5,13 @@ Implements Least Significant Bit decoding for extracting hidden messages from di
 """
 
 import struct
-from typing import Union
+from typing import Union, Optional
 import numpy as np
 from PIL import Image
 
 from .image_utils import ImageValidator, ImageProcessor
 from .exceptions import DecodingError
+from .crypto import SteganographyCrypto, EncryptionError
 
 
 class SteganoDecoder:
@@ -22,13 +23,15 @@ class SteganoDecoder:
         self.validator = ImageValidator()
         self.processor = ImageProcessor()
     
-    def decode(self, encoded_path: str, output_as_bytes: bool = False) -> Union[str, bytes]:
+    def decode(self, encoded_path: str, output_as_bytes: bool = False, 
+               password: Optional[str] = None) -> Union[str, bytes]:
         """
         Decode a hidden message from an image.
         
         Args:
             encoded_path: Path to the encoded image
             output_as_bytes: If True, return bytes; otherwise return string
+            password: Optional password for decryption
             
         Returns:
             Decoded message as string or bytes
@@ -46,6 +49,20 @@ class SteganoDecoder:
             
             # Decode the message
             message_bytes = self._decode_message(img_array)
+            
+            # Check if message is encrypted
+            is_encrypted = message_bytes.startswith(b'ENCRYPTED:')
+            if is_encrypted:
+                if not password:
+                    raise DecodingError("Message is encrypted but no password provided")
+                
+                try:
+                    # Remove encryption marker and decrypt
+                    encrypted_data = message_bytes[10:]  # Remove 'ENCRYPTED:' prefix
+                    crypto = SteganographyCrypto(password)
+                    message_bytes = crypto.decrypt(encrypted_data)
+                except EncryptionError as e:
+                    raise DecodingError(f"Decryption failed: {str(e)}")
             
             # Return in requested format
             if output_as_bytes:

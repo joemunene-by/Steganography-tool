@@ -5,12 +5,13 @@ Implements Least Significant Bit encoding for hiding messages in digital images.
 """
 
 import struct
-from typing import Union
+from typing import Union, Optional
 import numpy as np
 from PIL import Image
 
 from .image_utils import ImageValidator, ImageProcessor
 from .exceptions import MessageCapacityError, EncodingError
+from .crypto import SteganographyCrypto, EncryptionError
 
 
 class SteganoEncoder:
@@ -23,7 +24,7 @@ class SteganoEncoder:
         self.processor = ImageProcessor()
     
     def encode(self, carrier_path: str, message: Union[str, bytes], 
-               output_path: str) -> None:
+               output_path: str, password: Optional[str] = None) -> None:
         """
         Encode a message into an image using LSB steganography.
         
@@ -31,6 +32,7 @@ class SteganoEncoder:
             carrier_path: Path to the carrier image
             message: Message to hide (string or bytes)
             output_path: Path to save the encoded image
+            password: Optional password for encryption
             
         Raises:
             EncodingError: If encoding fails
@@ -46,6 +48,16 @@ class SteganoEncoder:
                 message_bytes = message.encode('utf-8')
             else:
                 message_bytes = message
+            
+            # Encrypt message if password provided
+            if password:
+                try:
+                    crypto = SteganographyCrypto(password)
+                    message_bytes = crypto.encrypt(message_bytes)
+                    # Add encryption marker
+                    message_bytes = b'ENCRYPTED:' + message_bytes
+                except EncryptionError as e:
+                    raise EncodingError(f"Encryption failed: {str(e)}")
             
             # Check capacity
             max_capacity = self.validator.calculate_capacity(image)

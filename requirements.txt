@@ -1,6 +1,8 @@
 # Core dependencies for the steganography tool
 Pillow>=9.0.0
 numpy>=1.21.0
+cryptography>=3.4.8
+PyYAML>=6.0
 
 # Development and testing dependencies
 pytest>=7.0.0
@@ -10,7 +12,4 @@ flake8>=5.0.0
 mypy>=0.991
 
 # Optional dependencies for enhanced functionality
-# Uncomment if needed:
-# cryptography>=3.4.8  # For encryption features
-# click>=8.0.0        # Alternative CLI framework
-# tqdm>=4.64.0       # Progress bars for large operations
+tqdm>=4.64.0       # Progress bars for large operations

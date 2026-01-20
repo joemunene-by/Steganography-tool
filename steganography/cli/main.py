@@ -10,7 +10,11 @@ import os
 from pathlib import Path
 
 from ..core import SteganoEncoder, SteganoDecoder, SteganographyError
-from .utils import setup_logging, validate_paths
+from ..core.batch import BatchProcessor
+from ..core.analysis import ImageAnalyzer
+from ..core.crypto import SteganographyCrypto
+from ..core.config import get_config, ConfigManager
+from .utils import setup_logging, validate_paths, progress_bar
 
 
 def create_parser() -> argparse.ArgumentParser:
@@ -25,6 +29,9 @@ Examples:
   steganography decode -i encoded.png
   steganography capacity -i image.png
   steganography check -i encoded.png
+  steganography analyze -i image.png
+  steganography batch-encode -d ./images -m "Secret" -o ./output
+  steganography generate-password --length 32
         """
     )
     
@@ -33,6 +40,18 @@ Examples:
         '-v', '--verbose',
         action='store_true',
         help='Enable verbose output'
+    )
+    
+    # Add configuration option
+    parser.add_argument(
+        '-c', '--config',
+        help='Path to configuration file'
+    )
+    
+    # Add password option
+    parser.add_argument(
+        '-p', '--password',
+        help='Password for encryption/decryption'
     )
     
     # Create subparsers for different commands

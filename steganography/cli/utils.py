@@ -6,6 +6,8 @@ import logging
 import os
 import sys
 from pathlib import Path
+import time
+from typing import Optional
 
 
 def setup_logging(verbose: bool = False) -> None:
@@ -114,3 +116,130 @@ def ensure_extension(file_path: str, default_ext: str) -> str:
     if not current_ext:
         return file_path + default_ext
     return file_path
+
+
+def progress_bar(current: int, total: int, prefix: str = "", suffix: str = "", 
+                length: int = 50, fill: str = '█') -> None:
+    """
+    Display a progress bar in the console.
+    
+    Args:
+        current: Current progress value
+        total: Total value
+        prefix: Prefix text
+        suffix: Suffix text
+        length: Bar length in characters
+        fill: Fill character
+    """
+    if total == 0:
+        return
+    
+    percent = 100 * (current / float(total))
+    filled_length = int(length * current // total)
+    bar = fill * filled_length + '-' * (length - filled_length)
+    
+    print(f'\r{prefix} |{bar}| {percent:.1f}% {suffix}', end='\r')
+    
+    # Print new line on completion
+    if current == total:
+        print()
+
+
+class ProgressTracker:
+    """Advanced progress tracker with time estimation."""
+    
+    def __init__(self, total: int, description: str = "Processing"):
+        """
+        Initialize progress tracker.
+        
+        Args:
+            total: Total number of items to process
+            description: Description of the operation
+        """
+        self.total = total
+        self.current = 0
+        self.description = description
+        self.start_time = time.time()
+        self.last_update = self.start_time
+    
+    def update(self, increment: int = 1) -> None:
+        """
+        Update progress.
+        
+        Args:
+            increment: Amount to increment progress
+        """
+        self.current += increment
+        self.last_update = time.time()
+        
+        # Calculate estimated time remaining
+        elapsed = self.last_update - self.start_time
+        if self.current > 0:
+            rate = self.current / elapsed
+            remaining = (self.total - self.current) / rate if rate > 0 else 0
+            eta_str = f"ETA: {remaining:.1f}s"
+        else:
+            eta_str = "ETA: --"
+        
+        # Display progress
+        progress_bar(
+            self.current, self.total,
+            prefix=f"{self.description}",
+            suffix=f"{self.current}/{self.total} ({eta_str})"
+        )
+    
+    def finish(self) -> None:
+        """Mark progress as complete."""
+        self.current = self.total
+        elapsed = self.last_update - self.start_time
+        progress_bar(
+            self.current, self.total,
+            prefix=f"{self.description}",
+            suffix=f"Complete in {elapsed:.1f}s"
+        )
+        print()
+
+
+def get_password(prompt: str = "Enter password: ") -> str:
+    """
+    Get password from user input securely.
+    
+    Args:
+        prompt: Prompt to display
+        
+    Returns:
+        Password string
+    """
+    try:
+        import getpass
+        return getpass.getpass(prompt)
+    except ImportError:
+        # Fallback for systems without getpass
+        return input(prompt)
+
+
+def confirm_action(message: str, default: bool = False) -> bool:
+    """
+    Ask for user confirmation.
+    
+    Args:
+        message: Confirmation message
+        default: Default response if user just presses Enter
+        
+    Returns:
+        True if user confirms, False otherwise
+    """
+    suffix = " [Y/n]" if default else " [y/N]"
+    
+    while True:
+        response = input(message + suffix + ": ").lower().strip()
+        
+        if not response:
+            return default
+        
+        if response in ['y', 'yes']:
+            return True
+        elif response in ['n', 'no']:
+            return False
+        else:
+            print("Please enter 'y' or 'n'.")
