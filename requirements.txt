@@ -1,4 +1,4 @@
-# Core dependencies for the steganography tool
+# Core dependencies for steganography tool
 Pillow>=9.0.0
 numpy>=1.21.0
 cryptography>=3.4.8
