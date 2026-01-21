@@ -4,6 +4,10 @@ numpy>=1.21.0
 cryptography>=3.4.8
 PyYAML>=6.0
 
+# Web interface dependencies
+Flask>=2.0.0
+Werkzeug>=2.0.0
+
 # Development and testing dependencies
 pytest>=7.0.0
 pytest-cov>=4.0.0
@@ -13,3 +17,4 @@ mypy>=0.991
 
 # Optional dependencies for enhanced functionality
 tqdm>=4.64.0       # Progress bars for large operations
+matplotlib>=3.5.0  # Visualization and plotting

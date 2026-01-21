@@ -143,8 +143,22 @@ def handle_encode(args) -> int:
             message = args.message
         else:
             try:
-                with open(args.file, 'r', encoding='utf-8') as f:
-                    message = f.read()
+                # Read file in binary mode to support any file type
+                with open(args.file, 'rb') as f:
+                    file_data = f.read()
+                
+                # Check if it's a text file or binary file
+                try:
+                    message = file_data.decode('utf-8')
+                    # Add marker for text files
+                    message = f"TEXT_FILE:{message}"
+                except UnicodeDecodeError:
+                    # It's a binary file, encode as base64
+                    import base64
+                    encoded_data = base64.b64encode(file_data).decode('ascii')
+                    filename = Path(args.file).name
+                    message = f"BINARY_FILE:{filename}:{encoded_data}"
+                    
             except Exception as e:
                 print(f"Error reading message file: {e}", file=sys.stderr)
                 return 1
@@ -155,7 +169,7 @@ def handle_encode(args) -> int:
         
         # Perform encoding
         encoder = SteganoEncoder()
-        encoder.encode(args.input, message, args.output)
+        encoder.encode(args.input, message, args.output, password=getattr(args, 'password', None))
         
         print(f"Successfully encoded message into {args.output}")
         return 0
@@ -178,23 +192,62 @@ def handle_decode(args) -> int:
         
         # Perform decoding
         decoder = SteganoDecoder()
-        message = decoder.decode(args.input, output_as_bytes=args.bytes)
+        message = decoder.decode(args.input, output_as_bytes=args.bytes, password=getattr(args, 'password', None))
         
-        # Output message
-        if args.output:
-            try:
-                mode = 'wb' if args.bytes else 'w'
-                with open(args.output, mode) as f:
+        # Handle different message types
+        if isinstance(message, str):
+            if message.startswith('TEXT_FILE:'):
+                # It's a text file
+                content = message[10:]  # Remove 'TEXT_FILE:' prefix
+                if args.output:
+                    mode = 'w'
+                    with open(args.output, mode) as f:
+                        f.write(content)
+                    print(f"Successfully decoded text file to {args.output}")
+                else:
+                    print(f"Decoded text file content:\n{content}")
+            elif message.startswith('BINARY_FILE:'):
+                # It's a binary file
+                try:
+                    import base64
+                    parts = message.split(':', 2)
+                    filename = parts[1]
+                    encoded_data = parts[2]
+                    file_data = base64.b64decode(encoded_data)
+                    
+                    if args.output:
+                        with open(args.output, 'wb') as f:
+                            f.write(file_data)
+                        print(f"Successfully decoded binary file to {args.output}")
+                    else:
+                        # Use original filename if no output specified
+                        default_output = filename
+                        with open(default_output, 'wb') as f:
+                            f.write(file_data)
+                        print(f"Successfully decoded binary file to {default_output}")
+                except Exception as e:
+                    print(f"Error decoding binary file: {e}", file=sys.stderr)
+                    return 1
+            else:
+                # It's a regular text message
+                if args.output:
+                    mode = 'wb' if args.bytes else 'w'
+                    with open(args.output, mode) as f:
+                        f.write(message)
+                    print(f"Successfully decoded message to {args.output}")
+                else:
+                    if args.bytes:
+                        print(f"Decoded message (bytes): {message}")
+                    else:
+                        print(f"Decoded message: {message}")
+        else:
+            # It's bytes
+            if args.output:
+                with open(args.output, 'wb') as f:
                     f.write(message)
                 print(f"Successfully decoded message to {args.output}")
-            except Exception as e:
-                print(f"Error writing output file: {e}", file=sys.stderr)
-                return 1
-        else:
-            if args.bytes:
-                print(f"Decoded message (bytes): {message}")
             else:
-                print(f"Decoded message: {message}")
+                print(f"Decoded message (bytes): {message}")
         
         return 0
         

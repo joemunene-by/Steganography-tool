@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Decode Message - Steganography Tool{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-unlock me-2"></i>Decode Message from Image
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        <div class="mb-4">
+                            <label for="image" class="form-label fw-bold">
+                                <i class="fas fa-image me-2"></i>Select Encoded Image
+                            </label>
+                            <input type="file" class="form-control" id="image" name="image" 
+                                   accept=".png,.jpg,.jpeg,.bmp,.tiff,.webp" required>
+                            <div class="form-text">
+                                Upload the image that contains a hidden message.
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="password" class="form-label fw-bold">
+                                <i class="fas fa-key me-2"></i>Decryption Password (If Encrypted)
+                            </label>
+                            <input type="password" class="form-control" id="password" name="password" 
+                                   placeholder="Enter password if the message was encrypted">
+                            <div class="form-text">
+                                Only required if the hidden message was encrypted with a password.
+                            </div>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-unlock me-2"></i>Decode Message
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            {% if message %}
+            <div class="card mt-4 shadow">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-check-circle me-2"></i>Decoded Message
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if message_type == 'text_file' %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-file-alt me-2"></i>
+                        <strong>Text File Content:</strong>
+                    </div>
+                    <pre class="bg-light p-3 rounded">{{ message }}</pre>
+                    {% elif message_type == 'text' %}
+                    <div class="alert alert-success">
+                        <i class="fas fa-comment me-2"></i>
+                        <strong>Text Message:</strong>
+                    </div>
+                    <div class="bg-light p-3 rounded">
+                        <p class="mb-0">{{ message }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>How It Works
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <ol class="mb-0">
+                        <li class="mb-2">Upload the image that contains a hidden message</li>
+                        <li class="mb-2">If the message was encrypted, enter the password</li>
+                        <li class="mb-2">Click "Decode Message" to extract the hidden content</li>
+                        <li>The decoded message will be displayed below</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="alert alert-warning mt-4">
+                <h6><i class="fas fa-exclamation-triangle me-2"></i>Important Notes:</h6>
+                <ul class="mb-0">
+                    <li>The image must contain a hidden message to decode successfully</li>
+                    <li>If the message was encrypted, you need the exact password</li>
+                    <li>Binary files will be downloaded automatically</li>
+                    <li>Text messages and files will be displayed on this page</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

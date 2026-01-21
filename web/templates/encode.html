@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Encode Message - Steganography Tool{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-lock me-2"></i>Encode Message in Image
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        <div class="mb-4">
+                            <label for="image" class="form-label fw-bold">
+                                <i class="fas fa-image me-2"></i>Select Carrier Image
+                            </label>
+                            <input type="file" class="form-control" id="image" name="image" 
+                                   accept=".png,.jpg,.jpeg,.bmp,.tiff,.webp" required>
+                            <div class="form-text">
+                                Supported formats: PNG, JPG, JPEG, BMP, TIFF, WEBP
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="message" class="form-label fw-bold">
+                                <i class="fas fa-comment me-2"></i>Secret Message
+                            </label>
+                            <textarea class="form-control" id="message" name="message" rows="5" 
+                                      placeholder="Enter your secret message here..." required></textarea>
+                            <div class="form-text">
+                                Your message will be hidden in the image using LSB steganography.
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="password" class="form-label fw-bold">
+                                <i class="fas fa-key me-2"></i>Encryption Password (Optional)
+                            </label>
+                            <input type="password" class="form-control" id="password" name="password" 
+                                   placeholder="Enter password for AES-256 encryption">
+                            <div class="form-text">
+                                Leave empty for no encryption. Password provides AES-256 encryption.
+                            </div>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-lock me-2"></i>Encode Message
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>How It Works
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <ol class="mb-0">
+                        <li class="mb-2">Upload your carrier image (any image will work)</li>
+                        <li class="mb-2">Enter the secret message you want to hide</li>
+                        <li class="mb-2">Optionally add a password for AES-256 encryption</li>
+                        <li class="mb-2">Click "Encode Message" to process your image</li>
+                        <li>Download the encoded image with your hidden message</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="alert alert-info mt-4">
+                <h6><i class="fas fa-lightbulb me-2"></i>Pro Tips:</h6>
+                <ul class="mb-0">
+                    <li>Use PNG images for best quality and maximum capacity</li>
+                    <li>Larger images can hold more data</li>
+                    <li>Always use a strong password for sensitive messages</li>
+                    <li>The encoded image will look identical to the original</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

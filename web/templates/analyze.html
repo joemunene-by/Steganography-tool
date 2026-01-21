@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block title %}Analyze Image - Steganography Tool{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="mb-0">
+                        <i class="fas fa-chart-line me-2"></i>Analyze Image for Steganography
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        <div class="mb-4">
+                            <label for="image" class="form-label fw-bold">
+                                <i class="fas fa-image me-2"></i>Select Image to Analyze
+                            </label>
+                            <input type="file" class="form-control" id="image" name="image" 
+                                   accept=".png,.jpg,.jpeg,.bmp,.tiff,.webp" required>
+                            <div class="form-text">
+                                Upload any image to analyze its steganographic properties.
+                            </div>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-warning btn-lg">
+                                <i class="fas fa-chart-line me-2"></i>Analyze Image
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            {% if analysis %}
+            <div class="card mt-4 shadow">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Analysis Results
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-image me-2"></i>Image Properties</h6>
+                            <ul class="list-unstyled">
+                                <li><strong>Dimensions:</strong> {{ analysis.width }} × {{ analysis.height }} pixels</li>
+                                <li><strong>Channels:</strong> {{ analysis.channels }}</li>
+                                <li><strong>Total Pixels:</strong> {{ analysis.total_pixels }}</li>
+                                <li><strong>Format:</strong> {{ analysis.format }}</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-database me-2"></i>Capacity Information</h6>
+                            <ul class="list-unstyled">
+                                <li><strong>Maximum Capacity:</strong> {{ capacity }} bytes</li>
+                                <li><strong>Maximum Capacity:</strong> {{ "%.2f"|format(capacity/1024) }} KB</li>
+                                <li><strong>Available Bits:</strong> {{ analysis.available_bits }}</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <h6><i class="fas fa-search me-2"></i>Message Detection</h6>
+                        {% if has_message %}
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle me-2"></i>
+                            <strong>Hidden message detected!</strong> This image appears to contain a steganographic message.
+                        </div>
+                        {% else %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>No hidden message detected.</strong> This image does not appear to contain a steganographic message.
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mt-4">
+                        <h6><i class="fas fa-chart-bar me-2"></i>Statistical Analysis</h6>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="text-center">
+                                    <div class="bg-primary text-white rounded p-3">
+                                        <h5>{{ "%.1f"|format(analysis.lsb_distribution.mean) }}</h5>
+                                        <small>LSB Mean</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center">
+                                    <div class="bg-success text-white rounded p-3">
+                                        <h5>{{ "%.3f"|format(analysis.lsb_distribution.std_dev) }}</h5>
+                                        <small>LSB Std Dev</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center">
+                                    <div class="bg-warning text-dark rounded p-3">
+                                        <h5>{{ "%.1f"|format(analysis.entropy) }}</h5>
+                                        <small>Entropy</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>What This Analysis Shows
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-chart-line me-2 text-primary"></i>Statistical Metrics</h6>
+                            <ul class="mb-0">
+                                <li><strong>LSB Distribution:</strong> Analyzes the pattern of least significant bits</li>
+                                <li><strong>Standard Deviation:</strong> Measures variation in LSB values</li>
+                                <li><strong>Entropy:</strong> Calculates the randomness of pixel data</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-shield-alt me-2 text-success"></i>Security Indicators</h6>
+                            <ul class="mb-0">
+                                <li><strong>Message Detection:</strong> Checks for steganographic headers</li>
+                                <li><strong>Capacity Analysis:</strong> Shows maximum data capacity</li>
+                                <li><strong>Format Support:</strong> Identifies image properties</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="alert alert-info mt-4">
+                <h6><i class="fas fa-lightbulb me-2"></i>Understanding the Results:</h6>
+                <ul class="mb-0">
+                    <li>Normal images have LSB values close to 0.5 with low standard deviation</li>
+                    <li>Steganographic images may show different LSB patterns</li>
+                    <li>Higher entropy values may indicate hidden data</li>
+                    <li>Message detection looks for specific steganographic markers</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

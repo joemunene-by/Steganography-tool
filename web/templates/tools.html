@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+
+{% block title %}Tools - Steganography Tool{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-secondary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-tools me-2"></i>Tools & Utilities
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card border-primary mb-3">
+                                <div class="card-header bg-primary text-white">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-key me-2"></i>Password Generator
+                                    </h6>
+                                </div>
+                                <div class="card-body text-center">
+                                    <p class="card-text">Generate cryptographically secure passwords for encryption.</p>
+                                    <a href="{{ url_for('generate_password') }}" class="btn btn-primary">
+                                        <i class="fas fa-random me-2"></i>Generate Password
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border-success mb-3">
+                                <div class="card-header bg-success text-white">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-calculator me-2"></i>Capacity Calculator
+                                    </h6>
+                                </div>
+                                <div class="card-body text-center">
+                                    <p class="card-text">Calculate maximum message capacity for different image sizes.</p>
+                                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#capacityModal">
+                                        <i class="fas fa-chart-bar me-2"></i>Open Calculator
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if generated_password %}
+                    <div class="alert alert-success mt-4">
+                        <h6><i class="fas fa-check-circle me-2"></i>Generated Password:</h6>
+                        <div class="input-group">
+                            <input type="text" class="form-control" value="{{ generated_password }}" readonly id="generatedPassword">
+                            <button class="btn btn-outline-secondary" type="button" onclick="copyPassword()">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                        </div>
+                        <small class="text-muted">Save this password securely. You'll need it to decrypt your message.</small>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card mt-4 shadow">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Useful Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-shield-alt me-2"></i>Security Best Practices</h6>
+                            <ul class="mb-0">
+                                <li>Use strong, unique passwords for encryption</li>
+                                <li>Prefer PNG format for maximum capacity</li>
+                                <li>Test with small messages first</li>
+                                <li>Keep original and encoded images separate</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-lightbulb me-2"></i>Performance Tips</h6>
+                            <ul class="mb-0">
+                                <li>Larger images hold more data</li>
+                                <li>Compression affects message integrity</li>
+                                <li>LSB changes are visually undetectable</li>
+                                <li>Quality loss is minimal with proper images</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-question-circle me-2"></i>Frequently Asked Questions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="accordion" id="faqAccordion">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="faq1">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse1">
+                                    What image format should I use?
+                                </button>
+                            </h2>
+                            <div id="collapse1" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    PNG is recommended for best results as it's lossless and provides maximum capacity. JPEG can work but may lose some hidden data due to compression.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="faq2">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse2">
+                                    How much data can I hide in an image?
+                                </button>
+                            </h2>
+                            <div id="collapse2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Capacity depends on image size: (Width × Height × Channels - 32) ÷ 8 bytes. A 1920×1080 PNG can hold approximately 777KB of data.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="faq3">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse3">
+                                    Is steganography detectable?
+                                </button>
+                            </h2>
+                            <div id="collapse3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    LSB steganography can be detected with statistical analysis, but it's difficult for casual observers. Using encryption adds an additional layer of security.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Capacity Calculator Modal -->
+<div class="modal fade" id="capacityModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-calculator me-2"></i>Capacity Calculator
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="imgWidth" class="form-label">Image Width (pixels)</label>
+                    <input type="number" class="form-control" id="imgWidth" value="1920" onchange="calculateCapacity()">
+                </div>
+                <div class="mb-3">
+                    <label for="imgHeight" class="form-label">Image Height (pixels)</label>
+                    <input type="number" class="form-control" id="imgHeight" value="1080" onchange="calculateCapacity()">
+                </div>
+                <div class="mb-3">
+                    <label for="imgChannels" class="form-label">Color Channels</label>
+                    <select class="form-select" id="imgChannels" onchange="calculateCapacity()">
+                        <option value="3">RGB (3 channels)</option>
+                        <option value="4">RGBA (4 channels)</option>
+                        <option value="1">Grayscale (1 channel)</option>
+                    </select>
+                </div>
+                <div class="alert alert-info">
+                    <h6>Estimated Capacity:</h6>
+                    <div id="capacityResult">777,600 bytes (759.38 KB)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function copyPassword() {
+    const passwordInput = document.getElementById('generatedPassword');
+    passwordInput.select();
+    document.execCommand('copy');
+    
+    // Show feedback
+    const button = event.target.closest('button');
+    const originalText = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-check"></i> Copied!';
+    setTimeout(() => {
+        button.innerHTML = originalText;
+    }, 2000);
+}
+
+function calculateCapacity() {
+    const width = parseInt(document.getElementById('imgWidth').value) || 0;
+    const height = parseInt(document.getElementById('imgHeight').value) || 0;
+    const channels = parseInt(document.getElementById('imgChannels').value) || 3;
+    
+    if (width > 0 && height > 0) {
+        const capacityBytes = Math.floor((width * height * channels - 32) / 8);
+        const capacityKB = (capacityBytes / 1024).toFixed(2);
+        const capacityMB = (capacityBytes / (1024 * 1024)).toFixed(2);
+        
+        let result = `${capacityBytes.toLocaleString()} bytes`;
+        if (capacityKB < 1024) {
+            result += ` (${capacityKB} KB)`;
+        } else {
+            result += ` (${capacityMB} MB)`;
+        }
+        
+        document.getElementById('capacityResult').textContent = result;
+    }
+}
+
+// Calculate on page load
+document.addEventListener('DOMContentLoaded', calculateCapacity);
+</script>
+{% endblock %}

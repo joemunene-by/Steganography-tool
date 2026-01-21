@@ -12,6 +12,7 @@ from .crypto import SteganographyCrypto
 from .batch import BatchProcessor
 from .analysis import ImageAnalyzer
 from .config import get_config, ConfigManager
+from .visualization import SteganographyVisualizer
 
 __version__ = "1.0.0"
 __all__ = [
@@ -21,6 +22,7 @@ __all__ = [
     "SteganographyCrypto",
     "BatchProcessor",
     "ImageAnalyzer",
+    "SteganographyVisualizer",
     "get_config",
     "ConfigManager"
 ]
